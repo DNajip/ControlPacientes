@@ -16,7 +16,8 @@ namespace ControlPacientes
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(new Form1());  // Modo desarrolloControlPacientes.pages.Pacientes()
+
         }
     }
 }
