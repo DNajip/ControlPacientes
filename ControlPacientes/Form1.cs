@@ -16,17 +16,35 @@ namespace ControlPacientes
         public Form1()
         {
             InitializeComponent();
+
+            ModificarVentana();
         }
 
         private void Cerrar_Click(object sender, EventArgs e)
         {
-            new Login().Show();
+            this.Hide (); // OCULTA EL FORM1 ACTUAL
+            Login login = new Login();
+            login.Show();
+
+            this.Close (); // Cierra definitivamente el form1
         }
 
 
         /* 
             Para este sofware primero crearemos los metodos que iremos utilizando y luego los integramos para funcionalidad. 
+
+
         */
+
+        private void ModificarVentana() { 
+            //Que sea pantalla completa
+            this.WindowState = FormWindowState.Maximized;
+
+            //Quitar posibilidad de redimensionar 
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+
+
+        }
 
         private Form formularioActivo = null;
 

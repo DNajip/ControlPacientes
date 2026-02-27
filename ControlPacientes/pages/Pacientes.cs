@@ -17,7 +17,17 @@ namespace ControlPacientes.pages
         public Pacientes()
         {
             InitializeComponent();
-            
+
+
+
+            //A la barra de busqueda le pondremos la carga de la descripcion
+            txtBuscar.Text = "Buscar por nombre, cédula o teléfono";
+            txtBuscar.ForeColor = Color.Gray;
+
+
+
+
+
         }
 
         /*
@@ -25,7 +35,8 @@ namespace ControlPacientes.pages
 
         */
 
-        private void CargarPacientes () {
+        private void CargarPacientes()
+        {
 
             try
             {
@@ -67,7 +78,8 @@ namespace ControlPacientes.pages
             //}
         }
 
-        private void ConfigurarGrid() {
+        private void ConfigurarGrid()
+        {
             if (dataPacientes.Columns.Count == 0) return;
 
             if (dataPacientes.Columns["id_paciente"] != null)
@@ -85,13 +97,26 @@ namespace ControlPacientes.pages
                 dataPacientes.Columns.Add(btn);
             }
 
-            //dataPacientes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataPacientes.ReadOnly = true;
-            dataPacientes.AllowUserToAddRows = false;
-            dataPacientes.RowHeadersVisible = false;
+            dataPacientes.Columns["Nombre"].DisplayIndex = 0;
+            dataPacientes.Columns["Identificación"].DisplayIndex = 1;
+            dataPacientes.Columns["Teléfono"].DisplayIndex = 2;
+            dataPacientes.Columns["Fecha de ingreso"].DisplayIndex = 3;
+            dataPacientes.Columns["Ver"].DisplayIndex = 4;
+
+            ////dataPacientes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            //dataPacientes.ReadOnly = true;
+            //dataPacientes.AllowUserToAddRows = false;
+            //dataPacientes.RowHeadersVisible = false;
+
+
+
+
         }
 
-        private void EstiloGrid() {
+        private void EstiloGrid()
+        {
+
+
             // No permitir edición
             dataPacientes.ReadOnly = true;
             dataPacientes.AllowUserToAddRows = false;
@@ -114,14 +139,33 @@ namespace ControlPacientes.pages
             // Ajuste automático
             dataPacientes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
+
+        private void BuscarPacientes(string texto)
+        {
+            using (SqlConnection cn = ConexionBD.ObtenerConexion())
+            {
+                using (SqlCommand cmd = new SqlCommand("sp_pacientes_buscar", cn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@texto", string.IsNullOrWhiteSpace(texto) ? (object)DBNull.Value : texto);
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+                    dataPacientes.DataSource = dt;
+                }
+            }
+        }
+
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void Pacientes_Load(object sender, EventArgs e)
+        private void Pacientes_Load(object sender, EventArgs e)  //Evento de carga del DataGridView
         {
-            
+
             CargarPacientes(); // Inicamos el metodo al cargar el formulario
             ConfigurarGrid(); // Ocultamos el id y agregamos la columnna de Ver ficha
             EstiloGrid(); // Estilos y modificaciones
@@ -144,6 +188,51 @@ namespace ControlPacientes.pages
             }
         }
 
+        private void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+           //BuscarPacientes(txtBuscar.Text.Trim());
+
+            if (txtBuscar.Text == "Buscar por nombre, cédula o teléfono")
+                return;
+
+            if (string.IsNullOrWhiteSpace(txtBuscar.Text))
+            {
+                CargarPacientes();
+                ConfigurarGrid();
+                EstiloGrid();
+                return;
+            }
+
+            BuscarPacientes(txtBuscar.Text.Trim());
+            ConfigurarGrid();
+            EstiloGrid();
+        }
+
+        private void txtBuscar_Enter(object sender, EventArgs e)
+        {
+            //Funcion si el txt contiene este elemento, al darle clic se eliminara
+            if (txtBuscar.Text == "Buscar por nombre, cédula o teléfono")
+            {
+
+                txtBuscar.Text = "";
+                txtBuscar.ForeColor = Color.Gray;
+            
+            
+            }
+        }
+
+        private void txtBuscar_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtBuscar.Text))
+            {
+                txtBuscar.Text = "Buscar por nombre, cédula o teléfono";
+                txtBuscar.ForeColor = Color.Gray;
+            }
+        }
+
+        private void cmbFiltro_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
-
+}

@@ -70,9 +70,9 @@ BEGIN
             ISNULL(pe.segundo_apellido, '')
         )) AS Nombre,
 
-        pe.desc_identificacion AS Cedula, 
-        pe.telefono AS Telefono,
-        pa.fecha_creacion AS [Fecha de creación]
+        pe.desc_identificacion AS Identificación, 
+        pe.telefono AS Teléfono,
+        pa.fecha_creacion AS [Fecha de ingreso]
 
     FROM tbl_pacientes pa
     INNER JOIN tbl_personas pe
@@ -84,3 +84,38 @@ GO
 
 select * from tbl_pacientes
 exec sp_pacientes_listar
+
+--Buscar pacientes
+CREATE OR ALTER PROCEDURE sp_pacientes_buscar
+    @texto VARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        p.id_paciente,
+        CONCAT(
+            per.primer_nombre, ' ',
+            ISNULL(per.segundo_nombre, ''), ' ',
+            per.primer_apellido, ' ',
+            ISNULL(per.segundo_apellido, '')
+        ) AS Nombre,
+        per.desc_identificacion AS Identificación,
+        per.telefono AS Teléfono,
+        p.fecha_creacion AS [Fecha de ingreso]
+    FROM tbl_pacientes p
+    INNER JOIN tbl_personas per ON p.id_persona = per.id_persona
+    WHERE 
+        p.id_estado = 1
+        AND (
+            @texto IS NULL
+            OR per.primer_nombre LIKE '%' + @texto + '%'
+            OR per.segundo_nombre LIKE '%' + @texto + '%'
+            OR per.primer_apellido LIKE '%' + @texto + '%'
+            OR per.segundo_apellido LIKE '%' + @texto + '%'
+            OR per.desc_identificacion LIKE '%' + @texto + '%'
+            OR per.telefono LIKE '%' + @texto + '%'
+        )
+    ORDER BY p.fecha_creacion DESC;
+END;
+GO
